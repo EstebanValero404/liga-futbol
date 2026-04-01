@@ -1,0 +1,9 @@
+# configuracion de ligaPato
+nombre=ligaPato Premier 2025
+victoria=3
+empate=1
+derrota=0
+equipo=Tigres
+equipo=America
+equipo=Chivas
+equipo=Cruz Azul

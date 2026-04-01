@@ -1,0 +1,14 @@
+# ejecutables
+*.exe
+*.out
+a.out
+
+# carpetas de compilacion
+build/
+bin/
+.vscode/
+.idea/
+
+# archivos del sistema
+.DS_Store
+Thumbs.db
