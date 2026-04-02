@@ -3,7 +3,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
 // ── configuracion de ligaPato ─────────────────────────────────────
