@@ -5,32 +5,32 @@
 #include <vector>
 using namespace std;
 
-// ── configuracion de ligaPato ─────────────────────────────────────
+// datos de configuracion de la liga
 struct ConfigLiga {
     string ligapato;
-    int ptsvictoria;
-    int ptsempate;
-    int ptsderrota;
+    int ptsV;
+    int ptsE;
+    int ptsD;
     vector<string> equipos;
 };
 
-// ── un partido jugado en ligaPato ─────────────────────────────────
+// un partido jugado
 struct Partido {
     string fecha;
     string local;
     string visitante;
-    int goleslocal;
-    int golesvisitante;
+    int golesL;
+    int golesV;
 };
 
-// ── ficha de un equipo en la tabla de ligaPato ────────────────────
+// estadisticas de cada equipo
 struct Equipo {
     string nombre;
     int pj, pg, pe, pp;
     int gf, gc, dg, pts;
 };
 
-// ── crea un equipo con estadisticas en cero ───────────────────────
+// crea un equipo con todo en cero
 Equipo crearEquipo(string nombre){
     Equipo e;
     e.nombre = nombre;
@@ -39,18 +39,19 @@ Equipo crearEquipo(string nombre){
     return e;
 }
 
-// ── lee el config.txt y llena la configuracion de ligaPato ────────
+// leo el config.txt y guardo los datos de la liga
 bool leerConfig(string nombreArchivo, ConfigLiga &config){
     ifstream archivo;
     archivo.open(nombreArchivo);
 
     if(!archivo.is_open()){
-        cout << "Error: no se encontro el archivo " << nombreArchivo << endl;
+        cout << "no se encontro el archivo " << nombreArchivo << endl;
         return false;
     }
 
     string linea;
     while(getline(archivo, linea)){
+        // salto lineas vacias y comentarios
         if(linea.empty() || linea[0] == '#') continue;
 
         stringstream ss(linea);
@@ -58,10 +59,10 @@ bool leerConfig(string nombreArchivo, ConfigLiga &config){
         getline(ss, clave, '=');
         getline(ss, valor);
 
-        if(clave == "nombre")   config.ligapato    = valor;
-        if(clave == "victoria") config.ptsvictoria = stoi(valor);
-        if(clave == "empate")   config.ptsempate   = stoi(valor);
-        if(clave == "derrota")  config.ptsderrota  = stoi(valor);
+        if(clave == "nombre")   config.ligapato = valor;
+        if(clave == "victoria") config.ptsV = stoi(valor);
+        if(clave == "empate")   config.ptsE = stoi(valor);
+        if(clave == "derrota")  config.ptsD = stoi(valor);
         if(clave == "equipo")   config.equipos.push_back(valor);
     }
 
@@ -69,54 +70,58 @@ bool leerConfig(string nombreArchivo, ConfigLiga &config){
     return true;
 }
 
-// ── guarda un partido en partidos.txt usando append ───────────────
+// guardo el partido en partidos.txt
 void guardarPartido(Partido p){
-    ofstream archivo("partidos.txt", ios::app);
+    // CORRECCIÓN: Apuntar a la carpeta data/
+    ofstream archivo("data/partidos.txt", ios::app);
 
     if(!archivo.is_open()){
-        cout << "Error: no se pudo abrir partidos.txt" << endl;
+        cout << "error abriendo partidos.txt" << endl;
         return;
     }
 
-    archivo << p.fecha          << ";"
-            << p.local          << ";"
-            << p.visitante      << ";"
-            << p.goleslocal     << ";"
-            << p.golesvisitante << endl;
+    archivo << p.fecha    << ";"
+            << p.local    << ";"
+            << p.visitante << ";"
+            << p.golesL   << ";"
+            << p.golesV   << endl;
 
     archivo.close();
 }
 
-// ── guarda una jornada completa en fechas.txt usando append ───────
+// guardo la jornada en fechas.txt
 void guardarJornada(int numJornada, string fecha, vector<Partido> partidos){
-    ofstream archivo("fechas.txt", ios::app);
+    // CORRECCIÓN: Apuntar a la carpeta data/
+    ofstream archivo("data/fechas.txt", ios::app);
 
     if(!archivo.is_open()){
-        cout << "Error: no se pudo abrir fechas.txt" << endl;
+        cout << "error abriendo fechas.txt" << endl;
         return;
     }
 
     archivo << "JORNADA=" << numJornada << endl;
-    archivo << "fecha="   << fecha      << endl;
+    archivo << "fecha=" << fecha << endl;
 
+    // escribo cada partido de la jornada
     for(int i = 0; i < partidos.size(); i++){
-        archivo << partidos[i].local          << ";"
-                << partidos[i].visitante      << ";"
-                << partidos[i].goleslocal     << ";"
-                << partidos[i].golesvisitante << endl;
+        archivo << partidos[i].local     << ";"
+                << partidos[i].visitante << ";"
+                << partidos[i].golesL    << ";"
+                << partidos[i].golesV    << endl;
     }
 
     archivo << "FIN_JORNADA" << endl;
     archivo.close();
 }
 
-// ── lee todos los partidos de partidos.txt ────────────────────────
+// leo todos los partidos del archivo
 vector<Partido> leerPartidos(){
     vector<Partido> partidos;
-    ifstream archivo("partidos.txt");
+    // CORRECCIÓN: Apuntar a la carpeta data/
+    ifstream archivo("data/partidos.txt");
 
     if(!archivo.is_open()){
-        cout << "Error: no se pudo abrir partidos.txt" << endl;
+        cout << "error abriendo partidos.txt" << endl;
         return partidos;
     }
 
@@ -128,15 +133,15 @@ vector<Partido> leerPartidos(){
         string campo;
         Partido p;
 
-        getline(ss, p.fecha,     ';');
-        getline(ss, p.local,     ';');
-        getline(ss, p.visitante, ';');
+        getline(ss, p.fecha,      ';');
+        getline(ss, p.local,      ';');
+        getline(ss, p.visitante,  ';');
 
         getline(ss, campo, ';');
-        p.goleslocal = stoi(campo);
+        p.golesL = stoi(campo);
 
         getline(ss, campo);
-        p.golesvisitante = stoi(campo);
+        p.golesV = stoi(campo);
 
         partidos.push_back(p);
     }
@@ -144,106 +149,104 @@ vector<Partido> leerPartidos(){
     archivo.close();
     return partidos;
 }
-// ── actualiza estadisticas de un equipo segun resultado ───────────
-// usa puntero para modificar el equipo original directamente
+
+// actualiza stats del equipo segun el resultado
 void actualizarEquipo(Equipo *e, int golesFavor, int golesContra, ConfigLiga config){
     e->pj++;
     e->gf += golesFavor;
     e->gc += golesContra;
-    e->dg  = e->gf - e->gc;
+    e->dg = e->gf - e->gc;
 
+    // verifico si gano, empato o perdio
     if(golesFavor > golesContra){
         e->pg++;
-        e->pts += config.ptsvictoria;
+        e->pts += config.ptsV;
     } else if(golesFavor == golesContra){
         e->pe++;
-        e->pts += config.ptsempate;
+        e->pts += config.ptsE;
     } else {
         e->pp++;
-        e->pts += config.ptsderrota;
+        e->pts += config.ptsD;
     }
 }
-// ── construye la tabla de posiciones desde partidos.txt ───────────
+
+// construyo la tabla leyendo todos los partidos
 vector<Equipo> construirTabla(ConfigLiga config){
-    // crear un equipo vacio por cada equipo de la liga
     vector<Equipo> tabla;
+
     for(int i = 0; i < config.equipos.size(); i++){
         tabla.push_back(crearEquipo(config.equipos[i]));
     }
 
-    // leer todos los partidos jugados
     vector<Partido> partidos = leerPartidos();
 
-    // para cada partido, actualizar estadisticas de local y visitante
     for(int i = 0; i < partidos.size(); i++){
         Partido p = partidos[i];
 
-        // buscar el equipo local en la tabla
+        // busco el equipo local y actualizo
         for(int j = 0; j < tabla.size(); j++){
             if(tabla[j].nombre == p.local){
-                actualizarEquipo(&tabla[j], p.goleslocal, p.golesvisitante, config);
+                actualizarEquipo(&tabla[j], p.golesL, p.golesV, config);
             }
         }
 
-        // buscar el equipo visitante en la tabla
+        // busco el visitante y actualizo
         for(int j = 0; j < tabla.size(); j++){
             if(tabla[j].nombre == p.visitante){
-                actualizarEquipo(&tabla[j], p.golesvisitante, p.goleslocal, config);
+                actualizarEquipo(&tabla[j], p.golesV, p.golesL, config);
             }
         }
     }
 
-    // ordenar por puntos de mayor a menor
+    // ordeno la tabla por puntos de mayor a menor
     for(int i = 0; i < tabla.size()-1; i++){
         for(int j = i+1; j < tabla.size(); j++){
             if(tabla[j].pts > tabla[i].pts){
                 Equipo temp = tabla[i];
-                tabla[i]    = tabla[j];
-                tabla[j]    = temp;
+                tabla[i] = tabla[j];
+                tabla[j] = temp;
             }
         }
     }
 
     return tabla;
 }
-// ── muestra la tabla de posiciones en consola ─────────────────────
+
+// muestro la tabla en pantalla
 void mostrarTabla(vector<Equipo> tabla){
-    cout << "\n--- Tabla de Posiciones ligaPato ---" << endl;
-    cout << "#  Equipo              PJ PG PE PP GF GC DG  PTS" << endl;
-    cout << "------------------------------------------------" << endl;
+    cout << "\n== Tabla de Posiciones ==" << endl;
+    cout << "#  Equipo              PJ PG PE PP GF GC DG PTS" << endl;
+    cout << "-----------------------------------------------" << endl;
 
     for(int i = 0; i < tabla.size(); i++){
         Equipo e = tabla[i];
 
-        // imprimir posicion
         cout << i+1 << ". ";
-
-        // imprimir nombre con padding para alinear columnas
         cout << e.nombre;
+
         int espacios = 20 - e.nombre.size();
         for(int s = 0; s < espacios; s++) cout << " ";
 
-        // imprimir estadisticas
-        cout << e.pj  << "  "
-             << e.pg  << "  "
-             << e.pe  << "  "
-             << e.pp  << "  "
-             << e.gf  << "  "
-             << e.gc  << "  "
-             << e.dg  << "  "
+        cout << e.pj << "  "
+             << e.pg << "  "
+             << e.pe << "  "
+             << e.pp << "  "
+             << e.gf << "  "
+             << e.gc << "  "
+             << e.dg << "  "
              << e.pts << endl;
     }
-    cout << "------------------------------------------------" << endl;
+    cout << "-----------------------------------------------" << endl;
 
-    // opcion de guardar en tabla.txt
-    cout << "\nGuardar tabla en tabla.txt? (1=si / 0=no): ";
     int guardar;
+    cout << "guardar en tabla.txt? (1=si / 0=no): ";
     cin >> guardar;
 
     if(guardar == 1){
-        ofstream archivo("tabla.txt");
-        archivo << "# Tabla de Posiciones - ligaPato" << endl;
-        archivo << "#  Equipo              PJ PG PE PP GF GC DG  PTS" << endl;
+        // CORRECCIÓN: Guardar también en la carpeta data/
+        ofstream archivo("data/tabla.txt");
+        archivo << "Tabla de Posiciones - " << endl;
+        archivo << "#  Equipo              PJ PG PE PP GF GC DG PTS" << endl;
         for(int i = 0; i < tabla.size(); i++){
             Equipo e = tabla[i];
             archivo << i+1 << ". " << e.nombre << "  "
@@ -253,15 +256,17 @@ void mostrarTabla(vector<Equipo> tabla){
                     << e.dg << " " << e.pts << endl;
         }
         archivo.close();
-        cout << "Tabla guardada en tabla.txt" << endl;
+        cout << "listo, tabla guardada" << endl;
     }
 }
-// ── muestra el historial de jornadas desde fechas.txt ─────────────
+
+// muestro el historial de jornadas
 void mostrarHistorial(){
-    ifstream archivo("fechas.txt");
+    // CORRECCIÓN: Apuntar a la carpeta data/
+    ifstream archivo("data/fechas.txt");
 
     if(!archivo.is_open()){
-        cout << "Error: no se pudo abrir fechas.txt" << endl;
+        cout << "no se pudo abrir fechas.txt" << endl;
         return;
     }
 
@@ -272,22 +277,18 @@ void mostrarHistorial(){
         if(linea.empty()) continue;
 
         if(linea.find("JORNADA=") == 0){
-            // inicio de jornada
             string num = linea.substr(8);
-            cout << "\n--- Jornada " << num << " ---" << endl;
+            cout << "\n-- Jornada " << num << " --" << endl;
             dentroJornada = true;
 
         } else if(linea == "FIN_JORNADA"){
-            // fin de jornada
             dentroJornada = false;
 
         } else if(linea.find("fecha=") == 0){
-            // fecha de la jornada
             string fecha = linea.substr(6);
             cout << "Fecha: " << fecha << endl;
 
         } else if(dentroJornada){
-            // partido dentro de la jornada
             stringstream ss(linea);
             string local, visitante, gl, gv;
             getline(ss, local,     ';');
@@ -301,99 +302,96 @@ void mostrarHistorial(){
 
     archivo.close();
 }
-// ── muestra todos los partidos jugados desde partidos.txt ─────────
+
+// muestro todos los partidos jugados
 void mostrarPartidos(){
     vector<Partido> partidos = leerPartidos();
 
     if(partidos.empty()){
-        cout << "\nNo hay partidos registrados aun." << endl;
+        cout << "\ntodavia no hay partidos registrados" << endl;
         return;
     }
 
-    cout << "\n--- Todos los partidos de ligaPato ---" << endl;
+    cout << "\n== Partidos jugados ==" << endl;
     for(int i = 0; i < partidos.size(); i++){
         Partido p = partidos[i];
         cout << i+1 << ". [" << p.fecha << "] "
-             << p.local         << " "  << p.goleslocal
+             << p.local  << " " << p.golesL
              << " - "
-             << p.golesvisitante << " " << p.visitante << endl;
+             << p.golesV << " " << p.visitante << endl;
     }
 }
-// ── guia al usuario para registrar un nuevo partido ───────────────
+
+// le pido al usuario los datos del partido y lo registro
 void registrarPartido(ConfigLiga config){
     Partido p;
 
-    cout << "\n--- Equipos de " << config.ligapato << " ---" << endl;
+    cout << "\nEquipos disponibles:" << endl;
     for(int i = 0; i < config.equipos.size(); i++){
         cout << "  " << i+1 << ". " << config.equipos[i] << endl;
     }
 
-    int idxLocal, idxVisitante;
-    cout << "\nSelecciona equipo LOCAL (numero): ";
-    cin  >> idxLocal;
-    idxLocal--;
+    int a, b;
+    cout << "\nequipo LOCAL (numero): ";
+    cin >> a;
+    a--;
 
-    cout << "Selecciona equipo VISITANTE (numero): ";
-    cin  >> idxVisitante;
-    idxVisitante--;
+    cout << "equipo VISITANTE (numero): ";
+    cin >> b;
+    b--;
 
-    if(idxLocal < 0 || idxLocal >= config.equipos.size() ||
-       idxVisitante < 0 || idxVisitante >= config.equipos.size()){
-        cout << "Error: numero de equipo invalido." << endl;
+    if(a < 0 || a >= config.equipos.size() ||
+       b < 0 || b >= config.equipos.size()){
+        cout << "numero de equipo invalido" << endl;
         return;
     }
-    if(idxLocal == idxVisitante){
-        cout << "Error: el local y visitante no pueden ser el mismo equipo." << endl;
+    if(a == b){
+        cout << "el local y visitante no pueden ser el mismo" << endl;
         return;
     }
 
-    p.local     = config.equipos[idxLocal];
-    p.visitante = config.equipos[idxVisitante];
+    p.local     = config.equipos[a];
+    p.visitante = config.equipos[b];
 
-    cout << "Goles de " << p.local     << ": ";
-    cin  >> p.goleslocal;
-    cout << "Goles de " << p.visitante << ": ";
-    cin  >> p.golesvisitante;
+    cout << "goles de " << p.local     << ": ";
+    cin  >> p.golesL;
+    cout << "goles de " << p.visitante << ": ";
+    cin  >> p.golesV;
 
-    cout << "Fecha del partido (ej: 2025-03-30): ";
+    cout << "fecha del partido (ej: 2025-03-30): ";
     cin  >> p.fecha;
 
     guardarPartido(p);
 
     vector<Partido> partidos;
     partidos.push_back(p);
-    guardarJornada(1, p.fecha, partidos);
+    guardarJornada(1, p.fecha, partidos); // Nota: aquí siempre estás guardando como Jornada 1. Podrías mejorarlo más adelante.
 
-    cout << "\nPartido registrado: "
-         << p.local         << " " << p.goleslocal
+    cout << "\npartido guardado: "
+         << p.local  << " " << p.golesL
          << " - "
-         << p.golesvisitante << " " << p.visitante << endl;
+         << p.golesV << " " << p.visitante << endl;
 }
 
-// ── muestra el menu de ligaPato y retorna la opcion elegida ───────
+// menu principal
 int mostrarMenu(string nombreLiga){
     int opcion;
-
-    cout << "\n-----------------------------------" << endl;
-    cout << "        " << nombreLiga               << endl;
-    cout << "-----------------------------------" << endl;
-    cout << "  1. Ver tabla de posiciones"         << endl;
-    cout << "  2. Registrar resultado de partido"  << endl;
-    cout << "  3. Ver historial de jornadas"       << endl;
-    cout << "  4. Ver todos los partidos jugados"  << endl;
-    cout << "  5. Salir"                           << endl;
-    cout << "-----------------------------------" << endl;
-    cout << "  Selecciona una opcion: ";
-    cin  >> opcion;
-
+    cout << "\n=== " << nombreLiga << " ===" << endl;
+    cout << "1. Ver tabla de posiciones" << endl;
+    cout << "2. Registrar partido" << endl;
+    cout << "3. Ver historial de jornadas" << endl;
+    cout << "4. Ver todos los partidos" << endl;
+    cout << "5. Salir" << endl;
+    cout << "opcion: ";
+    cin >> opcion;
     return opcion;
 }
 
-// ── punto de entrada de ligaPato ──────────────────────────────────
 int main(){
     ConfigLiga config;
 
-    if(!leerConfig("config.txt", config)){
+    // CORRECCIÓN: Apuntar a la carpeta data/
+    if(!leerConfig("data/config.txt", config)){
         return 1;
     }
 
@@ -404,8 +402,8 @@ int main(){
         opcion = mostrarMenu(config.ligapato);
 
         if(opcion == 1){
-        vector<Equipo> tabla = construirTabla(config);
-        mostrarTabla(tabla);
+            vector<Equipo> tabla = construirTabla(config);
+            mostrarTabla(tabla);
         } else if(opcion == 2){
             registrarPartido(config);
         } else if(opcion == 3){
@@ -413,9 +411,9 @@ int main(){
         } else if(opcion == 4){
             mostrarPartidos();
         } else if(opcion == 5){
-            cout << "\nHasta luego, vuelve pronto a " << config.ligapato << "!" << endl;
+            cout << "hasta luego!" << endl;
         } else {
-            cout << "\nOpcion invalida, intenta de nuevo." << endl;
+            cout << "opcion invalida" << endl;
         }
     }
 
